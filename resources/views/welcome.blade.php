@@ -67,17 +67,47 @@
                 <button type="button" class="btn btn-primary btn-submit">Submit</button>
               </form>
 
-              <table class="table mt-5" id="productTable">
+              <table class="table table-striped mt-5" id="productTable">
                 <thead>
                   <tr>
                     <th scope="col">#</th>
                     <th scope="col">Name</th>
                     <th scope="col">Price</th>
                     <th scope="col">Quantity</th>
+                    <th scope="col">Date Submitted</th>
+                    <th scope="col">Total Value</th>
+                    <th scope="col"></th>
+                    
+                    
                   </tr>
                 </thead>
                 <tbody>
-                 
+                    @forelse ($products as $product)
+                        <tr>
+                            <td>{{ $product['id'] }}</td>
+                            <td>{{ $product['name'] }}</td>
+                            <td>{{ $product['price'] }}</td>
+                            <td>{{ $product['quantity'] }}</td>
+                            <td>{{ $product['created_at'] }}</td>
+                            <td>{{ $product['total_value'] }}</td>
+                            <td><button type="button" data-id="{{ $product['id'] }}" class="btn btn-success">Edit</button></td>
+                        </tr>
+                        @empty
+
+                        <tr class="no-products">
+                            <td colspan="7" style="text-align: center;">No Products Found</td>
+                        </tr>
+                        
+                    @endforelse
+
+
+                    <!-- Row for Total Value -->
+                    @if (count($products))
+                    <tr class="total-values">
+                        <td colspan="5" style="text-align: right;">Total Value:</td>
+                        <td colspan="2">{{ $totalValue }}</td>
+                    </tr>
+                @endif
                 </tbody>
               </table>
 
@@ -117,14 +147,49 @@
 
                 if($.isEmptyObject(data.error)){
                     resetFields();
-                    $('#productTable tbody').append(`
-                        <tr>
-                             <td>${data.product.id}</td>
-                            <td>${data.product.name}</td>
-                            <td>${data.product.name}</td>
-                            <td>${data.product.quantity}</td>
-                        </tr>
-                    `);
+                    $('#productTable tbody tr.no-products').remove();
+
+                    console.log($(document).find('tr.total-values').length,'LENGTH')
+
+                    if ($(document).find('tr.total-values').length === 0) {
+
+                        $('#productTable tbody').append(`
+                            <tr>
+                                <td>${data.product.id}</td>
+                                <td>${data.product.name}</td>
+                                <td>${data.product.price}</td>
+                                <td>${data.product.quantity}</td>
+                                <td>${data.product.created_at}</td>
+                                <td>${data.product.total_value}</td>
+                                <td><button type="button" data-id="${data.product.id}" class="btn btn-success">Edit</button></td>
+                            </tr>
+                        `);
+
+                        $('#productTable tbody').append(`
+                            <tr class="total-values">
+                                <td colspan="5" style="text-align: right;">Total Value:</td>
+                                <td colspan="2">${data.total_value}</td>
+                            </tr>
+                        `);
+                        
+                    } else {
+                        $(document).find('tr.total-values').before(`
+                            <tr>
+                                <td>${data.product.id}</td>
+                                <td>${data.product.name}</td>
+                                <td>${data.product.price}</td>
+                                <td>${data.product.quantity}</td>
+                                <td>${data.product.created_at}</td>
+                                <td>${data.product.total_value}</td>
+                                <td><button type="button" data-id="${data.product.id}" class="btn btn-success">Edit</button></td>
+                            </tr>
+                        `);
+                        
+
+                        $('#productTable tbody tr.total-values td:last-child').text(data.total_value);
+
+                    }
+                    
                 }
                 alert('product created!!!');
 
